@@ -1,6 +1,6 @@
 import hashlib
 import requests
-
+import json
 import sys
 
 from uuid import uuid4
@@ -18,14 +18,28 @@ def proof_of_work(last_proof):
     - IE:  last_hash: ...AE9123456, new hash 123456888...
     - p is the previous proof, and p' is the new proof
     - Use the same method to generate SHA-256 hashes as the examples in class
+
+
+
+
+
+
+    
+        block_string = json.dumps(block, sort_keys=True)
+    proof = 0
+    while valid_proof(block_string, proof) is False:
+        proof += 1
+    return proof
     """
 
     start = timer()
 
     print("Searching for next proof")
-    proof = 0
-    #  TODO: Your code here
-
+    proof = 100000
+    block_string = json.dumps(last_proof, sort_keys=True)
+    print(block_string, 'Block String')
+    while valid_proof(block_string, proof) is False:
+        proof += 1
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
 
@@ -37,12 +51,28 @@ def valid_proof(last_hash, proof):
     of the new proof?
 
     IE:  last_hash: ...AE9123456, new hash 123456E88...
+        guess = f'{block_string}{proof}'.encode()
+    guess_hash = hashlib.sha256(guess).hexdigest()
+    return guess_hash[:DIFFICULTY] == "0" * DIFFICULTY
     """
-
     # TODO: Your code here!
-    pass
+    # guess = f"{block_string}{proof}".encode()
+    # guess_hash hashlib.sha256(guess).hexdigest()
+    # return guess_hash
 
-
+    # guess = f'{block_string}{proof}'.encode()
+    # guess_hash =  hashlib.sha256(guess).hexdigest()
+    # if guess_hash[:6]:
+    #     print("working")
+    # return guess_hash[:6] 
+    prev_hash = f'{last_hash}'.encode()
+    prev_hash = hashlib.sha256(prev_hash).hexdigest()
+    guess_hash = f'{proof}'.encode()
+    guess_hash = hashlib.sha256(guess_hash).hexdigest()
+    if guess_hash[:6] == prev_hash[-6:]:
+        print(f'{guess_hash[:6]}')
+    return guess_hash[:6] == prev_hash[-6:]
+#https://lambda-coin-test-1.herokuapp.com/api
 if __name__ == '__main__':
     # What node are we interacting with?
     if len(sys.argv) > 1:
